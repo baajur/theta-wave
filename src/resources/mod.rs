@@ -1,5 +1,5 @@
 use crate::components::{
-    AnimationComponent, AutoFireComponent, BlasterComponent, CharacterComponent,
+    AbilityComponent, AnimationComponent, AutoFireComponent, BlasterComponent, CharacterComponent,
     ConsumableComponent, EnemyComponent, HealthComponent, Hitbox2DComponent, ItemComponent,
     Motion2DComponent,
 };
@@ -42,6 +42,7 @@ pub struct ConsumableEntityData {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct PlayerEntityData {
     pub character_component: CharacterComponent,
+    pub barrel_roll_ability_component: Option<AbilityComponent>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]

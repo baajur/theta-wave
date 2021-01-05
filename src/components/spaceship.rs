@@ -8,14 +8,14 @@ use amethyst::{
 };
 
 pub struct SpaceshipComponent {
-    pub barrel_cooldown: f32,
-    pub barrel_reset_timer: f32,
-    pub barrel_speed: f32,
-    pub barrel_action_left: bool,
-    pub barrel_action_right: bool,
-    pub barrel_duration: f32,
-    pub barrel_action_timer: f32,
-    pub steel_barrel: bool,
+    //pub barrel_cooldown: f32,
+//pub barrel_reset_timer: f32,
+//pub barrel_speed: f32,
+//pub barrel_action_left: bool,
+//pub barrel_action_right: bool,
+//pub barrel_duration: f32,
+//pub barrel_action_timer: f32,
+//pub steel_barrel: bool,
 }
 
 impl Rigidbody for SpaceshipComponent {
@@ -30,18 +30,22 @@ impl Rigidbody for SpaceshipComponent {
 
         if (spaceship_x - (hitbox_2d.width / 2.0)) < ARENA_MIN_X {
             //if colliding with left border of arena
+            /*
             if self.barrel_action_left {
                 self.barrel_action_right = true;
                 self.barrel_action_left = false;
             }
+            */
             transform.set_translation_x(ARENA_MIN_X + (hitbox_2d.width / 2.0));
             motion_2d.velocity.x = motion_2d.velocity.x.abs();
         } else if (spaceship_x + (hitbox_2d.width / 2.0)) > ARENA_MAX_X {
             //if colliding with right border of arena
+            /*
             if self.barrel_action_right {
                 self.barrel_action_right = false;
                 self.barrel_action_left = true;
             }
+            */
             transform.set_translation_x(ARENA_MAX_X - (hitbox_2d.width / 2.0));
             motion_2d.velocity.x = -1.0 * motion_2d.velocity.x.abs();
         } else if (spaceship_y - (hitbox_2d.height / 2.0)) < ARENA_MIN_Y {
@@ -60,6 +64,7 @@ impl Component for SpaceshipComponent {
     type Storage = DenseVecStorage<Self>;
 }
 
+/*
 impl SpaceshipComponent {
     pub fn initiate_barrel_roll(&mut self, left: bool, right: bool) {
         if left || right {
@@ -108,3 +113,4 @@ impl SpaceshipComponent {
         }
     }
 }
+*/

@@ -1,12 +1,11 @@
 use crate::{
     components::{
         BlastType, BlasterComponent, HealthComponent, Hitbox2DComponent, ManualFireComponent,
-        Motion2DComponent, SpaceshipComponent,
+        Motion2DComponent, PlayerTag, SpaceshipComponent,
     },
     constants::{
         ARENA_HEIGHT, ARENA_MIN_X, ARENA_MIN_Y, ARENA_WIDTH, CRIT_BLAST_SPRITE_INDEX,
         POISON_BLAST_SPRITE_INDEX, SPACESHIP_ACCELERATION_X, SPACESHIP_ACCELERATION_Y,
-        SPACESHIP_BARREL_COOLDOWN, SPACESHIP_BARREL_DURATION, SPACESHIP_BARREL_SPEED,
         SPACESHIP_BLAST_SPRITE_INDEX, SPACESHIP_DAMAGE, SPACESHIP_DECELERATION_X,
         SPACESHIP_DECELERATION_Y, SPACESHIP_FIRE_SPEED, SPACESHIP_HEALTH, SPACESHIP_HITBOX_HEIGHT,
         SPACESHIP_HITBOX_WIDTH, SPACESHIP_MAX_KNOCKBACK_SPEED, SPACESHIP_MAX_SPEED,
@@ -25,7 +24,7 @@ use std::collections::HashMap;
 pub fn initialize_spaceship(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
     let player = {
         let players_resource = world.read_resource::<PlayersResource>();
-        players_resource["juggernaut"].character_component.clone()
+        players_resource["juggernaut"].clone()
     };
 
     let mut local_transform = Transform::default();
@@ -92,19 +91,10 @@ pub fn initialize_spaceship(world: &mut World, sprite_sheet_handle: Handle<Sprit
         armor: 0,
     };
 
-    world
+    let player_entity = world
         .create_entity()
+        .with(SpaceshipComponent {})
         .with(sprite_render)
-        .with(SpaceshipComponent {
-            barrel_cooldown: SPACESHIP_BARREL_COOLDOWN,
-            barrel_reset_timer: 0.0,
-            barrel_speed: SPACESHIP_BARREL_SPEED,
-            barrel_action_right: false,
-            barrel_action_left: false,
-            barrel_duration: SPACESHIP_BARREL_DURATION,
-            barrel_action_timer: SPACESHIP_BARREL_DURATION,
-            steel_barrel: false,
-        })
         .with(blaster)
         .with(manual_fire)
         .with(hitbox)
@@ -112,6 +102,12 @@ pub fn initialize_spaceship(world: &mut World, sprite_sheet_handle: Handle<Sprit
         .with(health)
         .with(local_transform)
         .with(Transparent)
-        .with(player)
-        .build();
+        .with(player.character_component)
+        .with(PlayerTag);
+
+    if let Some(barrel_roll_ability_component) = player.barrel_roll_ability_component {
+        player_entity.with(barrel_roll_ability_component).build();
+    } else {
+        player_entity.build();
+    }
 }

@@ -1,4 +1,6 @@
-use crate::components::{Hitbox2DComponent, Motion2DComponent, Rigidbody, SpaceshipComponent};
+use crate::components::{
+    Hitbox2DComponent, Motion2DComponent, PlayerTag, Rigidbody, SpaceshipComponent,
+};
 use amethyst::{
     core::{timing::Time, Transform},
     ecs::{Join, Read, ReadStorage, System, WriteStorage},
@@ -9,6 +11,7 @@ pub struct SpaceshipMovementSystem;
 
 impl<'s> System<'s> for SpaceshipMovementSystem {
     type SystemData = (
+        ReadStorage<'s, PlayerTag>,
         WriteStorage<'s, Transform>,
         WriteStorage<'s, SpaceshipComponent>,
         WriteStorage<'s, Motion2DComponent>,
@@ -19,12 +22,21 @@ impl<'s> System<'s> for SpaceshipMovementSystem {
 
     fn run(
         &mut self,
-        (mut transforms, mut spaceships, mut motion_2d_components, hitboxes, input, time): Self::SystemData,
+        (
+            player_tags,
+            mut transforms,
+            mut spaceships,
+            mut motion_2d_components,
+            hitboxes,
+            input,
+            time,
+        ): Self::SystemData,
     ) {
         let x_move = input.axis_value("player_x").unwrap() as f32;
         let y_move = input.axis_value("player_y").unwrap() as f32;
 
-        for (spaceship, transform, motion_2d, hitbox) in (
+        for (_player_tag, spaceship, transform, motion_2d, hitbox) in (
+            &player_tags,
             &mut spaceships,
             &mut transforms,
             &mut motion_2d_components,
@@ -35,14 +47,7 @@ impl<'s> System<'s> for SpaceshipMovementSystem {
             //keep spaceship with bounds of arena
             spaceship.constrain_to_arena(transform, motion_2d, hitbox);
 
-            //if barrel rolling a direction use the barrel roll x velocity, otherwise accelerate normally
-            if spaceship.barrel_action_left {
-                motion_2d.velocity.x = -1.0 * spaceship.barrel_speed;
-            } else if spaceship.barrel_action_right {
-                motion_2d.velocity.x = spaceship.barrel_speed;
-            } else {
-                spaceship.accelerate(x_move, y_move, motion_2d);
-            }
+            spaceship.accelerate(x_move, y_move, motion_2d);
 
             spaceship.update_position(transform, time.delta_seconds(), motion_2d);
         }

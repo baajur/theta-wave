@@ -1,4 +1,4 @@
-use amethyst::ecs::prelude::{Component, DenseVecStorage};
+use amethyst::ecs::prelude::{Component, DenseVecStorage, NullStorage};
 
 use serde::{Deserialize, Serialize};
 
@@ -10,4 +10,11 @@ pub struct CharacterComponent {
 
 impl Component for CharacterComponent {
     type Storage = DenseVecStorage<Self>;
+}
+
+#[derive(Default)]
+pub struct PlayerTag;
+
+impl Component for PlayerTag {
+    type Storage = NullStorage<Self>;
 }

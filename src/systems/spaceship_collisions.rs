@@ -1,8 +1,8 @@
 use crate::{
     audio::Sounds,
     components::{
-        BlastComponent, BlastType, CharacterComponent, ConsumableComponent, DefenseTag,
-        EnemyComponent, HealthComponent, ItemComponent, Motion2DComponent, SpaceshipComponent,
+        AbilityComponent, BlastComponent, BlastType, CharacterComponent, ConsumableComponent,
+        DefenseTag, EnemyComponent, HealthComponent, ItemComponent, Motion2DComponent,
     },
     entities::spawn_blast_explosion,
     events::{ItemGetEvent, PlayAudioEvent, PlayerCollisionEvent},
@@ -23,7 +23,6 @@ impl<'s> System<'s> for SpaceshipEnemyCollisionSystem {
     type SystemData = (
         Read<'s, EventChannel<PlayerCollisionEvent>>,
         ReadStorage<'s, EnemyComponent>,
-        WriteStorage<'s, SpaceshipComponent>,
         WriteStorage<'s, Motion2DComponent>,
         WriteStorage<'s, HealthComponent>,
     );
@@ -39,15 +38,17 @@ impl<'s> System<'s> for SpaceshipEnemyCollisionSystem {
 
     fn run(
         &mut self,
-        (collision_event_channel, enemies, mut spaceships, mut motions, mut healths): Self::SystemData,
+        (collision_event_channel, enemies, mut motions, mut healths): Self::SystemData,
     ) {
         for event in collision_event_channel.read(self.event_reader.as_mut().unwrap()) {
             // Is the player colliding with an entity with an enemy component?
             if let Some(enemy) = enemies.get(event.colliding_entity) {
-                let spaceship = spaceships.get_mut(event.player_entity).unwrap();
+                // let barrel_roll_ability =
+                //    barrel_roll_abilities.get_mut(event.player_entity).unwrap();
                 let spaceship_motion = motions.get_mut(event.player_entity).unwrap();
                 let spaceship_health = healths.get_mut(event.player_entity).unwrap();
 
+                /*
                 if spaceship.barrel_action_left {
                     spaceship.barrel_action_right = true;
                     spaceship.barrel_action_left = false;
@@ -61,6 +62,7 @@ impl<'s> System<'s> for SpaceshipEnemyCollisionSystem {
                 {
                     spaceship_health.take_damage(enemy.collision_damage);
                 }
+                */
 
                 if let Some(velocity) = event.collision_velocity {
                     // Push the ship in the opposite direction.

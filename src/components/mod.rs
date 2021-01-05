@@ -1,5 +1,6 @@
 use amethyst::core::transform::Transform;
 
+mod abilities;
 mod animation;
 mod blast;
 mod boss;
@@ -21,10 +22,11 @@ mod timelimit;
 mod weapons;
 
 pub use self::{
+    abilities::{AbilityComponent, AbilityType},
     animation::{AnimationComponent, AnimationType},
     blast::{BlastComponent, BlastType},
     boss::RepeaterComponent,
-    character::CharacterComponent,
+    character::{CharacterComponent, PlayerTag},
     consumable::ConsumableComponent,
     enemy::{EnemyComponent, EnemySpawnerTag, EnemyType},
     gamemaster::{BossType, GameMasterComponent, Phase, PhaseType},

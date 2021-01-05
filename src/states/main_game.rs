@@ -1,5 +1,6 @@
 use crate::{
     audio::initialize_audio,
+    components::AbilityComponent,
     constants::{
         ARENA_HEIGHT, ARENA_MAX_X, ARENA_MIN_X, ARENA_MIN_Y, ARENA_WIDTH, CAMERA_X, CAMERA_Y,
         CAMERA_Z,
@@ -137,6 +138,7 @@ impl SimpleState for MainGameState {
         let spritesheets = init_spritesheets(world);
 
         self.dispatcher.setup(world);
+        world.register::<AbilityComponent>(); // TODO: remove this
 
         initialize_audio(world);
         initialise_ui(world);

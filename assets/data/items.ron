@@ -83,7 +83,7 @@
     "spice": (
         item_component: (
             stat_effects: {
-                "barrel_cooldown": -0.5,
+                "execute_cooldown": -0.5,
             },
             price: 8,
             sprite_index: 9,

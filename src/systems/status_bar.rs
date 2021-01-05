@@ -1,7 +1,7 @@
 use crate::{
     components::{
-        DefenseTag, HealthComponent, SpaceshipComponent, StatusBarComponent, StatusType,
-        StoreComponent,
+        AbilityComponent, DefenseTag, HealthComponent, PlayerTag, SpaceshipComponent,
+        StatusBarComponent, StatusType, StoreComponent,
     },
     entities::spawn_status_unit,
     resources::SpriteSheetsResource,
@@ -20,6 +20,8 @@ pub struct StatusBarSystem;
 impl<'s> System<'s> for StatusBarSystem {
     type SystemData = (
         Entities<'s>,
+        ReadStorage<'s, PlayerTag>,
+        ReadStorage<'s, AbilityComponent>,
         WriteStorage<'s, StatusBarComponent>,
         ReadStorage<'s, SpaceshipComponent>,
         ReadStorage<'s, DefenseTag>,
@@ -33,6 +35,8 @@ impl<'s> System<'s> for StatusBarSystem {
         &mut self,
         (
             entities,
+            player_tags,
+            abilities,
             mut status_bars,
             spaceships,
             defense_tags,
@@ -79,10 +83,10 @@ impl<'s> System<'s> for StatusBarSystem {
                 }
 
                 StatusType::Roll => {
-                    for spaceship in (&spaceships).join() {
+                    for (_player_tag, ability) in (&player_tags, &abilities).join() {
                         if let Some(status_position) = status_bar.update_units_x(
-                            spaceship.barrel_cooldown,
-                            spaceship.barrel_cooldown - spaceship.barrel_reset_timer,
+                            ability.execute_cooldown,
+                            ability.execute_cooldown - ability.execute_timer,
                             &entities,
                         ) {
                             status_bar.status_unit_stack.push(spawn_status_unit(
