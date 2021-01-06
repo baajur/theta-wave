@@ -21,30 +21,6 @@ pub enum AbilityType {
 
 impl AbilityType {
     fn execute(&mut self, input: &Read<InputHandler<StringBindings>>) -> bool {
-        /*
-        match self {
-            Self::BarrelRoll {
-                mut is_active_left,
-                mut is_active_right,
-                speed,
-                steel_barrel,
-            } => {
-                let barrel_left = input.action_is_down("barrel_left").unwrap();
-                let barrel_right = input.action_is_down("barrel_right").unwrap();
-
-                if barrel_left {
-                    is_active_left = true;
-                    return true;
-                } else if barrel_right {
-                    is_active_right = true;
-                    return true;
-                }
-            }
-            Self::Swap => {}
-            Self::None => {}
-        };
-        false
-        */
         let mut result = false;
         *self = match std::mem::replace(self, AbilityType::None) {
             Self::BarrelRoll {
@@ -73,6 +49,23 @@ impl AbilityType {
             _ => Self::None,
         };
         result
+    }
+
+    fn end_action(&mut self) {
+        *self = match std::mem::replace(self, AbilityType::None) {
+            Self::BarrelRoll {
+                is_active_left: _,
+                is_active_right: _,
+                speed,
+                steel_barrel,
+            } => Self::BarrelRoll {
+                is_active_left: false,
+                is_active_right: false,
+                speed,
+                steel_barrel,
+            },
+            _ => Self::None,
+        };
     }
 }
 
@@ -118,7 +111,7 @@ impl AbilityComponent {
 
             if self.action_timer <= 0.0 {
                 self.is_active = false;
-                //self.ability_type.end_action()
+                self.ability_type.end_action()
             }
         }
 
