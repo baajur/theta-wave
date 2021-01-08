@@ -9,86 +9,72 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum AbilityType {
-    BarrelRoll {
-        is_active_left: bool,
-        is_active_right: bool,
-        speed: f32,
-        steel_barrel: bool,
-    },
-    Swap,
+    BarrelRoll,
     None,
 }
 
-impl AbilityType {
-    fn execute(&mut self, input: &Read<InputHandler<StringBindings>>) -> bool {
-        let mut result = false;
-        *self = match std::mem::replace(self, AbilityType::None) {
-            Self::BarrelRoll {
-                mut is_active_left,
-                mut is_active_right,
-                speed,
-                steel_barrel,
-            } => {
-                let barrel_left = input.action_is_down("barrel_left").unwrap();
-                let barrel_right = input.action_is_down("barrel_right").unwrap();
+pub trait SpecialAbility {
+    fn execute(&mut self, input: &Read<InputHandler<StringBindings>>) -> bool;
+    fn end_action(&mut self);
+}
 
-                if barrel_left {
-                    is_active_left = true;
-                    result = true;
-                } else if barrel_right {
-                    is_active_right = true;
-                    result = true;
-                }
-                Self::BarrelRoll {
-                    is_active_left,
-                    is_active_right,
-                    speed,
-                    steel_barrel,
-                }
-            }
-            _ => Self::None,
-        };
-        result
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct BarrelRoll {
+    pub is_active_left: bool,
+    pub is_active_right: bool,
+    pub speed: f32,
+    pub steel_barrel: bool,
+}
+
+impl SpecialAbility for BarrelRoll {
+    fn execute(&mut self, input: &Read<InputHandler<StringBindings>>) -> bool {
+        let barrel_left = input.action_is_down("barrel_left").unwrap();
+        let barrel_right = input.action_is_down("barrel_right").unwrap();
+
+        if barrel_left {
+            self.is_active_left = true;
+            return true;
+        } else if barrel_right {
+            self.is_active_right = true;
+            return true;
+        }
+
+        false
     }
 
     fn end_action(&mut self) {
-        *self = match std::mem::replace(self, AbilityType::None) {
-            Self::BarrelRoll {
-                is_active_left: _,
-                is_active_right: _,
-                speed,
-                steel_barrel,
-            } => Self::BarrelRoll {
-                is_active_left: false,
-                is_active_right: false,
-                speed,
-                steel_barrel,
-            },
-            _ => Self::None,
-        };
+        self.is_active_left = false;
+        self.is_active_right = false;
     }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct AbilityComponent {
+pub struct AbilityComponent<T>
+where
+    T: SpecialAbility,
+{
     // cooldown ability specific
     pub execute_cooldown: f32, // cooldown_time
     pub execute_timer: f32,    // cooldown_timer
     pub action_cooldown: f32,  // action_time
     pub action_timer: f32,     // action_timer
     pub is_active: bool,
-
     pub ability_type: AbilityType,
+
+    pub special_ability: T,
 }
 
-impl Component for AbilityComponent {
+impl<T> Component for AbilityComponent<T> {
     type Storage = DenseVecStorage<Self>;
 }
 
-impl AbilityComponent {
+impl<T> AbilityComponent<T>
+where
+    T: SpecialAbility,
+{
     // checks for input then executes special ability if input pressed
     pub fn execute(&mut self, input: &Read<InputHandler<StringBindings>>) {
-        if self.execute_timer <= 0.0 && !self.is_active && self.ability_type.execute(input) {
+        if self.execute_timer <= 0.0 && !self.is_active && self.special_ability.execute(input) {
             // reset execution and action cooldowns, and set active
             self.execute_timer = self.execute_cooldown;
             self.action_timer = self.action_cooldown;
@@ -111,7 +97,7 @@ impl AbilityComponent {
 
             if self.action_timer <= 0.0 {
                 self.is_active = false;
-                self.ability_type.end_action()
+                self.special_ability.end_action()
             }
         }
 

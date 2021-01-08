@@ -10,7 +10,7 @@ use crate::{
         SPACESHIP_DECELERATION_Y, SPACESHIP_FIRE_SPEED, SPACESHIP_HEALTH, SPACESHIP_HITBOX_HEIGHT,
         SPACESHIP_HITBOX_WIDTH, SPACESHIP_MAX_KNOCKBACK_SPEED, SPACESHIP_MAX_SPEED,
     },
-    resources::PlayersResource,
+    resources::JuggernautPlayerResource,
 };
 use amethyst::{
     assets::Handle,
@@ -23,8 +23,8 @@ use std::collections::HashMap;
 
 pub fn initialize_spaceship(world: &mut World, sprite_sheet_handle: Handle<SpriteSheet>) {
     let player = {
-        let players_resource = world.read_resource::<PlayersResource>();
-        players_resource["juggernaut"].clone()
+        let players_resource = world.read_resource::<JuggernautPlayerResource>();
+        players_resource.clone()
     };
 
     let mut local_transform = Transform::default();

@@ -1,8 +1,8 @@
 use crate::{
     audio::Sounds,
     components::{
-        AbilityComponent, AbilityType, BlasterComponent, HealthComponent, ManualFireComponent,
-        Motion2DComponent, PlayerTag, SpaceshipComponent,
+        AbilityComponent, AbilityType, BarrelRoll, BlasterComponent, HealthComponent,
+        ManualFireComponent, Motion2DComponent, PlayerTag, SpaceshipComponent,
     },
     events::{ItemGetEvent, PlayAudioEvent},
     resources::SpriteSheetsResource,
@@ -24,7 +24,7 @@ impl<'s> System<'s> for SpaceshipSystem {
     type SystemData = (
         Entities<'s>,
         ReadStorage<'s, PlayerTag>,
-        WriteStorage<'s, AbilityComponent>,
+        WriteStorage<'s, AbilityComponent<BarrelRoll>>,
         WriteStorage<'s, Transform>,
         WriteStorage<'s, SpaceshipComponent>,
         WriteStorage<'s, HealthComponent>,
@@ -54,7 +54,7 @@ impl<'s> System<'s> for SpaceshipSystem {
         (
             entities,
             player_tags,
-            mut abilities,
+            mut barrel_roll_abilities, // TODO: generalize to all abilities
             mut transforms,
             mut spaceships,
             mut healths,
@@ -86,9 +86,8 @@ impl<'s> System<'s> for SpaceshipSystem {
         )
             .join()
         {
-            // barrel roll input cooldown
-            // amount of time until new barrel roll can be initiated
-            for (_player_tag, ability) in (&player_tags, &mut abilities).join() {
+            // barrel roll ability
+            for (_player_tag, ability) in (&player_tags, &mut barrel_roll_abilities).join() {
                 ability.execute(&input);
                 ability.update(time.delta_seconds());
                 /*
@@ -125,28 +124,14 @@ impl<'s> System<'s> for SpaceshipSystem {
         }
 
         for event in item_get_event_channel.read(self.item_get_event_reader.as_mut().unwrap()) {
-            let ability = abilities.get_mut(event.player_entity).unwrap();
+            let barrel_roll_ability = barrel_roll_abilities.get_mut(event.player_entity).unwrap();
             let spaceship_health = healths.get_mut(event.player_entity).unwrap();
             let blaster = blasters.get_mut(event.player_entity).unwrap();
             let manual_fire = manual_fires.get_mut(event.player_entity).unwrap();
             let motion = motion2ds.get_mut(event.player_entity).unwrap();
 
             if event.bool_effects.contains_key("barrel_immunity") {
-                if let AbilityType::BarrelRoll {
-                    is_active_left,
-                    is_active_right,
-                    speed,
-                    mut steel_barrel,
-                } = ability.ability_type
-                {
-                    steel_barrel = event.bool_effects["barrel_immunity"];
-                    ability.ability_type = AbilityType::BarrelRoll {
-                        is_active_left,
-                        is_active_right,
-                        speed,
-                        steel_barrel,
-                    };
-                }
+                barrel_roll_ability.special_ability.steel_barrel = true;
             }
 
             if event.stat_effects.contains_key("blast_count") {
@@ -174,7 +159,8 @@ impl<'s> System<'s> for SpaceshipSystem {
             }
 
             if event.stat_effects.contains_key("execute_cooldown") {
-                ability.execute_cooldown += event.stat_effects["execute_cooldown"];
+                // TODO: generalize to all abilities
+                barrel_roll_ability.execute_cooldown += event.stat_effects["execute_cooldown"];
             }
 
             if event.stat_effects.contains_key("acceleration") {

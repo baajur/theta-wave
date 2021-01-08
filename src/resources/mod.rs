@@ -1,7 +1,7 @@
 use crate::components::{
-    AbilityComponent, AnimationComponent, AutoFireComponent, BlasterComponent, CharacterComponent,
-    ConsumableComponent, EnemyComponent, HealthComponent, Hitbox2DComponent, ItemComponent,
-    Motion2DComponent,
+    AbilityComponent, AnimationComponent, AutoFireComponent, BarrelRoll, BlasterComponent,
+    CharacterComponent, ConsumableComponent, EnemyComponent, HealthComponent, Hitbox2DComponent,
+    ItemComponent, Motion2DComponent, SpecialAbility,
 };
 use amethyst::{
     assets::Handle,
@@ -40,9 +40,12 @@ pub struct ConsumableEntityData {
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub struct PlayerEntityData {
+pub struct PlayerEntityData<T>
+where
+    T: SpecialAbility,
+{
     pub character_component: CharacterComponent,
-    pub barrel_roll_ability_component: Option<AbilityComponent>,
+    pub ability_component: AbilityComponent<T>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -55,7 +58,8 @@ pub type EnemiesResource = HashMap<String, EnemyEntityData>;
 pub type ThrustersResource = HashMap<String, ThrusterEntityData>;
 pub type ItemsResource = HashMap<String, ItemEntityData>;
 pub type ConsumablesResource = HashMap<String, ConsumableEntityData>;
-pub type PlayersResource = HashMap<String, PlayerEntityData>;
+pub type JuggernautPlayerResource = PlayerEntityData<BarrelRoll>;
+//pub type PlayersResource = HashMap<String, PlayerEntityData<Any>>;
 
 #[derive(Clone)]
 pub struct SpriteSheetsResource {

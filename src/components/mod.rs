@@ -22,7 +22,7 @@ mod timelimit;
 mod weapons;
 
 pub use self::{
-    abilities::{AbilityComponent, AbilityType},
+    abilities::{AbilityComponent, AbilityType, BarrelRoll, SpecialAbility},
     animation::{AnimationComponent, AnimationType},
     blast::{BlastComponent, BlastType},
     boss::RepeaterComponent,

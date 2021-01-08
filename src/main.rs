@@ -28,8 +28,8 @@ pub mod states;
 pub mod systems;
 
 use resources::{
-    ConsumablesResource, DebugLinesConfig, EnemiesResource, ItemsResource, PlayersResource,
-    SoundsConfig, SpriteSheetsConfig, ThrustersResource,
+    ConsumablesResource, DebugLinesConfig, EnemiesResource, ItemsResource,
+    JuggernautPlayerResource, SoundsConfig, SpriteSheetsConfig, ThrustersResource,
 };
 use states::MainGameState;
 
@@ -41,6 +41,7 @@ fn main() -> amethyst::Result<()> {
     let app_root = application_root_dir()?;
     let config_path = app_root.join("config");
     let data_path = app_root.join("assets").join("data");
+    let players_path = data_path.join("players");
 
     let display_config_path = config_path.join("display_config_960.ron");
     let bindings_path = config_path.join("bindings_config.ron");
@@ -61,7 +62,7 @@ fn main() -> amethyst::Result<()> {
         .expect("failed to load data file: thrusters.ron");
     let consumables = <ConsumablesResource as Config>::load(data_path.join("consumables.ron"))
         .expect("failed to load data file: consumables.ron");
-    let players = <PlayersResource as Config>::load(data_path.join("players.ron"))
+    let players = <JuggernautPlayerResource as Config>::load(players_path.join("juggernaut.ron"))
         .expect("failed to load data file: players.ron");
 
     let game_data = GameDataBuilder::default()
